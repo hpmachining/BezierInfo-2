@@ -20,11 +20,13 @@
     "browser": true
   },
   "extends": "eslint:recommended",
-  "ecmaFeatures": {
-    "es6": true,
-    "jsx": true,
-    "experimentalObjectRestSpread": true
-  },
+  "parserOptions": {
+    "ecmaFeatures": {
+      "es6": true,
+      "jsx": true,
+      "experimentalObjectRestSpread": true
+     }
+   },
   "plugins": [
     "react"
   ]
