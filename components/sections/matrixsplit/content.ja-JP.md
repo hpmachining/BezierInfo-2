@@ -1,6 +1,6 @@
-# Splitting curves using matrices
+# 行列による曲線の分割
 
-Another way to split curves is to exploit the matrix representation of a Bézier curve. In <a href="#matrix">the section on matrices</a> we saw that we can represent curves as matrix multiplications. Specifically, we saw these two forms for the quadratic, and cubic curves, respectively (using the reversed Bézier coefficients vector for legibility):
+曲線分割には、ベジエ曲線の行列表現を利用する方法もあります。<a href="#matrix">行列についての節</a>では、行列の乗算で曲線が表現できることを確認しました。特に2次・3次のベジエ曲線に関しては、それぞれ以下のような形になりました（読みやすさのため、ベジエの係数ベクトルを反転させています）。
 
 \[
   B(t) = \begin{bmatrix}
@@ -18,7 +18,7 @@ Another way to split curves is to exploit the matrix representation of a Bézier
   \end{bmatrix}
 \]
 
-and
+ならびに
 
 \[
   B(t) = \begin{bmatrix}
@@ -37,7 +37,7 @@ and
   \end{bmatrix}
 \]
 
-Let's say we want to split the curve at some point `t = z`, forming two new (obviously smaller) Bézier curves. To find the coordinates for these two Bézier curves, we can use the matrix representation and some linear algebra. First, we split out the actual "point on the curve" information as a new matrix multiplication:
+曲線をある点`t = z`で分割し、新しく2つの（自明ですが、より短い）ベジエ曲線を作ることを考えましょう。曲線の行列表現と線形代数を利用すると、この2つのベジエ曲線の座標を求めることができます。まず、実際の「曲線上の点」の情報を分解し、新しい行列の積のかたちにします。
 
 \[
   B(t) =
@@ -76,7 +76,7 @@ Let's say we want to split the curve at some point `t = z`, forming two new (obv
   \end{bmatrix}
 \]
 
-and
+ならびに
 
 \[
   B(t) =
@@ -118,13 +118,13 @@ and
   \end{bmatrix}
 \]
 
-If we could compact these matrices back to a form **[t values] · [bezier matrix] · [column matrix]**, with the first two staying the same, then that column matrix on the right would be the coordinates of a new Bézier curve that describes the first segment, from `t = 0` to `t = z`. As it turns out, we can do this quite easily, by exploiting some simple rules of linear algebra (and if you don't care about the derivations, just skip to the end of the box for the results!).
+これらの行列をまとめて、仮に**[tの値たち] · [ベジエ行列] · [列ベクトル]**の形式にできたとしましょう。ただし、先頭2つの行列は変わらずそのままだとします。このとき、右端の列ベクトルは、前半部分すなわち`t = 0`から`t = z`を表す、新しいベジエ曲線の座標となります。結論からいうと、線形代数の簡単な規則を使えば、この変形は非常に容易です（そして、導出過程を気にしないのであれば、囲みの末尾まで飛ばして結果に行ってもかまいません！）。
 
 <div className="note">
 
-## Deriving new hull coordinates
+## 新しい凸包の座標の導出
 
-Deriving the two segments upon splitting a curve takes a few steps, and the higher the curve order, the more work it is, so let's look at the quadratic curve first:
+曲線を分割して2つの部分を得るためには、いくつかの段階を経る必要があります。曲線の次数が高くなるほど手間がかかるようになりますので、まずは2次の曲線で見てみましょう。
 
 \[
   B(t) =
@@ -155,7 +155,7 @@ Deriving the two segments upon splitting a curve takes a few steps, and the high
   1 & t & t^2
   \end{bmatrix}
   \cdot
-  \underset{we\ turn\ this...}{\underbrace{\kern 2.25em Z \cdot M \kern 2.25em}}
+  \underset{これを…}{\underbrace{\kern 2.25em Z \cdot M \kern 2.25em}}
   \cdot
   \begin{bmatrix}
   P_1 \\ P_2 \\ P_3
@@ -168,7 +168,7 @@ Deriving the two segments upon splitting a curve takes a few steps, and the high
   1 & t & t^2
   \end{bmatrix}
   \cdot
-  \underset{...into\ this...}{\underbrace{ M \cdot M^{-1} \cdot Z \cdot M }}
+  \underset{…こうして…}{\underbrace{ M \cdot M^{-1} \cdot Z \cdot M }}
   \cdot
   \begin{bmatrix}
   P_1 \\ P_2 \\ P_3
@@ -182,13 +182,13 @@ Deriving the two segments upon splitting a curve takes a few steps, and the high
   \end{bmatrix}
   \cdot
   M
-  \underset{...to\ get\ this!}{\underbrace{ \kern 1.25em \cdot \kern 1.25em Q \kern 1.25em \cdot \kern 1.25em}}
+  \underset{…こうじゃ！}{\underbrace{ \kern 1.25em \cdot \kern 1.25em Q \kern 1.25em \cdot \kern 1.25em}}
   \begin{bmatrix}
   P_1 \\ P_2 \\ P_3
   \end{bmatrix}
 \]
 
-We do this, because [*M · M<sup>-1</sup>*] is the identity matrix (a bit like multiplying something by x/x in calculus. It doesn't do anything to the function, but it does allow you to rewrite it to something that may be easier to work with, or can be broken up differently). Adding that as matrix multiplication has no effect on the total formula, but it does allow us to change the matrix sequence [*something · M*] to a sequence [*M · something*], and that makes a world of difference: if we know what [*M<sup>-1</sup> · Z · M*] is, we can apply that to our coordinates, and be left with a proper matrix representation of a quadratic Bézier curve (which is [*T · M · P*]), with a new set of coordinates that represent the curve from *t = 0* to *t = z*. So let's get computing:
+[*M · M<sup>-1</sup>*]は単位行列なので、このような操作ができるのです（これは微積分でいえば、なにかにx/xを掛けるようなものです。関数自体はなにも変わりませんが、解きやすいかたちに変形したり、別のかたちに分解したりといったことが可能になります）。この行列を掛けると、式全体としてはなにも変わりませんが、[*なにか · M*]という行列の並びを[*M · なにか*]という並びに変えることができます。そして、これが大きな違いを生み出します。[*M<sup>-1</sup> · Z · M*]の値が分かれば、それを座標に掛け合わせることによって、2次ベジエ曲線の正しい行列表現（すなわち[*T · M · P*]）と、*t = 0*から*t = z*までの曲線を表す座標の組とが得られます。では、計算してみましょう。
 
 \[
   Q = M^{-1} \cdot Z \cdot M =
@@ -217,7 +217,7 @@ We do this, because [*M · M<sup>-1</sup>*] is the identity matrix (a bit like m
   \end{bmatrix}
 \]
 
-Excellent! Now we can form our new quadratic curve:
+いいですね！これで、新しい2次ベジエ曲線が得られます。
 
 \[
   B(t) =
@@ -288,9 +288,9 @@ Excellent! Now we can form our new quadratic curve:
   \end{bmatrix}
 \]
 
-***Brilliant***: if we want a subcurve from `t = 0` to `t = z`, we can keep the first coordinate the same (which makes sense), our control point becomes a z-ratio mixture of the original control point and the start point, and the new end point is a mixture that looks oddly similar to a [Bernstein polynomial](https://en.wikipedia.org/wiki/Bernstein_polynomial) of degree two, except it uses (z-1) rather than (1-z)... These new coordinates are actually really easy to compute directly!
+***すばらしい***。`t = 0`から`t = z`の部分曲線を求める場合、始点の座標はそのままになります（もっともです）。制御点は、元々の制御点と始点を、比率zで混ぜ合わせたものになります。そして不思議なことに、新たな終点は2次の[ベルンシュタイン多項式](https://ja.wikipedia.org/wiki/バーンスタイン多項式)に似た混ぜ合わせになります。ただし、(1-z)の代わりに(z-1)になっています。これらの新しい座標は、とても簡単に直接計算ができるのです！
 
-Of course, that's only one of the two curves. Getting the section from `t = z` to `t = 1` requires doing this again. We first observe what we just did is actually evaluate the general interval [0,`z`], which we wrote down simplified becuase of that zero, but we actually evaluated this:
+もちろん、これは2曲線のうちの片方にすぎません。`t = z`から`t = 1`の部分を得るためには、同様の計算をする必要があります。まず、今さっき行ったのは、一般の区間[0,`z`]についての計算でした。これは0があるので簡単な形になっていましたが、実際には、次の式を計算していたということがわかります。
 
 \[
   B(t) =
@@ -332,7 +332,7 @@ Of course, that's only one of the two curves. Getting the section from `t = z` t
   \end{bmatrix}
 \]
 
-If we want the interval [*z*,1], we will be evaluating this instead:
+区間[*z*,1]を求めたい場合は、かわりに次のような計算になります。
 
 \[
   B(t) =
@@ -374,7 +374,7 @@ If we want the interval [*z*,1], we will be evaluating this instead:
   \end{bmatrix}
 \]
 
-We're going to do the same trick, to turn `[something · M]` into `[M · something]`:
+先ほどと同じ手法を使い、[*なにか · M*]を[*M · なにか*]に変えます。
 
 \[
   Q' = M^{-1} \cdot Z' \cdot M =
@@ -403,7 +403,7 @@ We're going to do the same trick, to turn `[something · M]` into `[M · somethi
   \end{bmatrix}
 \]
 
-So, our final second curve looks like:
+よって、後半部分の曲線は結局のところ以下のようになります。
 
 \[
   B(t) =
@@ -474,11 +474,11 @@ So, our final second curve looks like:
   \end{bmatrix}
 \]
 
-***Nice***: we see the same as before; can keep the last coordinate the same (which makes sense), our control point becomes a z-ratio mixture of the original control point and the end point, and the new start point is a mixture that looks oddly similar to a bernstein polynomial of degree two, except it uses (z-1) rather than (1-z). These new coordinates are *also* really easy to compute directly!
+***おみごと***。先ほどと同じようになっていることがわかります。終点の座標はそのままで（もっともです）、制御点は、元々の制御点と終点を比率zで混ぜ合わせたものになります。そして不思議なことに、新たな始点は2次のベルンシュタイン多項式に似た混ぜ合わせになります。ただし、(1-z)の代わりに(z-1)になっています。これらの新しい座標*も*、とても簡単に直接計算ができるのです！
 
 </div>
 
-So, using linear algebra rather than de Casteljau's algorithm, we have determined that for any quadratic curve split at some value `t = z`, we get two subcurves that are described as Bézier curves with simple-to-derive coordinates.
+というわけで、ド・カステリョのアルゴリズムではなく線形代数の方を使うと、どのような2次ベジエ曲線でもある値`t = z`で分割すれば2つのベジエ曲線となり、しかもその座標は簡単に求められる、ということがわかりました。
 
 \[
   \begin{bmatrix}
@@ -498,7 +498,7 @@ So, using linear algebra rather than de Casteljau's algorithm, we have determine
   \end{bmatrix}
 \]
 
-and
+および
 
 \[
   \begin{bmatrix}
@@ -518,7 +518,7 @@ and
   \end{bmatrix}
 \]
 
-We can do the same for cubic curves. However, I'll spare you the actual derivation (don't let that stop you from writing that out yourself, though) and simply show you the resulting new coordinate sets:
+3次の曲線についても同様です。ただし、実際の導出はあなたにとっておきますので（自力で書き下してみてください）、新しい座標の組の結果を示すだけにします。
 
 \[
   \begin{bmatrix}
@@ -540,7 +540,7 @@ We can do the same for cubic curves. However, I'll spare you the actual derivati
   \end{bmatrix}
 \]
 
-and
+および
 
 \[
   \begin{bmatrix}
@@ -562,6 +562,6 @@ and
   \end{bmatrix}
 \]
 
-So, looking at our matrices, did we really need to compute the second segment matrix? No, we didn't. Actually having one segment's matrix means we implicitly have the other: push the values of each row in the matrix ***Q*** to the right, with zeroes getting pushed off the right edge and appearing back on the left, and then flip the matrix vertically. Presto, you just "calculated" ***Q'***.
+さて、これらの行列を見るに、後半部分の曲線の行列は本当に計算する必要があったのでしょうか？いえ、ありませんでした。片方の行列が得られれば、実はもう一方の行列も暗に得られたことになります。まず、行列***Q***の各行の値を右側に寄せ、右側にあった0を左側に押しのけます。次に行列を上下に反転させます。これでたちまち***Q'***が「計算」できるのです。
 
-Implementing curve splitting this way requires less recursion, and is just straight arithmetic with cached values, so can be cheaper on systems were recursion is expensive. If you're doing computation with devices that are good at matrix multiplication, chopping up a Bézier curve with this method will be a lot faster than applying de Casteljau.
+この方法で曲線の分割を実装すれば、再帰が少なくて済みます。また、数値のキャッシュを利用した単純な演算になるので、再帰の計算コストが大きいシステムにおいては、コストが抑えられるかもしれません。行列の乗算に適したデバイスで計算を行えば、ド・カステリョのアルゴリズムに比べてかなり速くなるでしょう。
